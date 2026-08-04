@@ -16,6 +16,7 @@ namespace Liferoad
         public MainCode()
         {
             _graphics = new GraphicsDeviceManager(this);
+            _graphics.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
             _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
             _graphics.IsFullScreen = true;
@@ -43,6 +44,31 @@ namespace Liferoad
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            MessageBG = new Texture2D(GraphicsDevice, 1, 1);
+            Darkness = new Texture2D(GraphicsDevice, 1, 1);
+            MessageBG.SetData([new Color(0, 0, 0)]);
+            Darkness.SetData([new Color(0, 0, 0, 150)]);
+
+            DepthStencilStateForRead = new DepthStencilState
+            {
+                StencilEnable = true,
+                StencilFunction = CompareFunction.Equal,
+                ReferenceStencil = 0,
+                DepthBufferEnable = false
+            };
+            DepthStencilStateForWrite = new DepthStencilState
+            {
+                StencilEnable = true,
+                StencilFunction = CompareFunction.Always,
+                StencilPass = StencilOperation.Replace,
+                ReferenceStencil = 1,
+                DepthBufferEnable = false
+            };
+            DepthStencilBlendState = new BlendState
+            {
+                ColorWriteChannels = ColorWriteChannels.None
+            };
+
             DirectoryInfo DirectoryInfo = new DirectoryInfo("Content\\Maps");
 
             foreach (FileInfo File in DirectoryInfo.GetFiles("*.cs"))
@@ -59,6 +85,24 @@ namespace Liferoad
                 Exit();
             }
 
+            if (Mouse.GetState().LeftButton == ButtonState.Pressed)
+            {
+                Inputs.MouseDown = true;
+                Inputs.MousePress = true;
+            }
+            else
+            {
+                Inputs.MouseDown = false;
+            }
+            if (Inputs.MousePress && !Inputs.MouseDown)
+            {
+                Inputs.MouseUp = true;
+                Inputs.MousePress = false;
+            }
+            else
+            {
+                Inputs.MouseUp = false;
+            }
             if (Keyboard.GetState().IsKeyDown(Keys.W))
             {
                 Inputs.Up = true;
@@ -91,6 +135,19 @@ namespace Liferoad
             {
                 Inputs.Right = false;
             }
+            if (Keyboard.GetState().IsKeyDown(Keys.E))
+            {
+                Inputs.InteractReset = true;
+            }
+            if (Inputs.InteractReset && !Keyboard.GetState().IsKeyDown(Keys.E))
+            {
+                Inputs.Interact = true;
+                Inputs.InteractReset = false;
+            }
+            else
+            {
+                Inputs.Interact = false;
+            }
 
             MainGameScenarioManager.Update();
 
@@ -99,7 +156,7 @@ namespace Liferoad
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.Stencil, Color.CornflowerBlue, 0, 0);
 
             _spriteBatch.Begin();
 

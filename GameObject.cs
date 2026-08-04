@@ -11,6 +11,9 @@ namespace Liferoad
         public float PositionX, PositionY;
         public Rectangle SolidBody;
         public bool IsSolid;
+        int LightLevel = 0;
+        Action Event;
+        public bool IsPlayerNear { get; set; }
 
         public GameObject(float PositionX, float PositionY, Texture2D Image, bool IsSolid)
         {
@@ -19,6 +22,26 @@ namespace Liferoad
             SolidBody = new Rectangle((int)Math.Round(PositionX), (int)Math.Round(PositionY), TILE_SIZE, TILE_SIZE);
             this.Image = Image;
             this.IsSolid = IsSolid;
+        }
+
+        public void SetLightLevel(int LightLevel)
+        {
+            this.LightLevel = LightLevel;
+        }
+
+        public int GetLightLevel()
+        {
+            return LightLevel;
+        }
+
+        public void SetEvent(Action Event)
+        {
+            this.Event = Event;
+        }
+
+        public void DoEvent()
+        {
+            Event?.Invoke();
         }
 
         public Texture2D GetImage()

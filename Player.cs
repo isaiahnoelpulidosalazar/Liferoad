@@ -8,9 +8,17 @@ namespace Liferoad
 {
     public class Player : Entity
     {
-        public Player()
+        public GameObject PlayerNearestGameObject;
+
+        public void SetSpeed(float Speed)
         {
-            Speed = 4f;
+            this.Speed = Speed;
+        }
+
+        public void SetPosition(float PositionX, float PositionY)
+        {
+            this.PositionX = PositionX;
+            this.PositionY = PositionY;
         }
 
         public void Update()
@@ -27,6 +35,15 @@ namespace Liferoad
 
             CheckCollision(this, CurrentMap.GetTiles());
             CheckObjectCollision(this, CurrentMap.GetObjects());
+            PlayerNearestGameObject = NearestGameObject(this, CurrentMap.GetObjects());
+
+            if (Inputs.Interact)
+            {
+                if (PlayerNearestGameObject != null)
+                {
+                    PlayerNearestGameObject.DoEvent();
+                }
+            }
 
             if (UL || UR || DL || DR)
             {

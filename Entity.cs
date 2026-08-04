@@ -71,5 +71,22 @@ namespace Liferoad
                 }
             }
         }
+
+        public GameObject NearestGameObject(Entity Entity, List<GameObject> Objects)
+        {
+            foreach (GameObject Object in Objects)
+            {
+                Object.IsPlayerNear = false;
+            }
+            foreach (GameObject Object in Objects)
+            {
+                if (Entity.TriggerArea.Intersects(Object.SolidBody))
+                {
+                    Object.IsPlayerNear = true;
+                    return Object;
+                }
+            }
+            return null;
+        }
     }
 }
