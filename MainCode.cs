@@ -46,6 +46,9 @@ namespace Liferoad
 
             MessageBG = new Texture2D(GraphicsDevice, 1, 1);
             Darkness = new Texture2D(GraphicsDevice, 1, 1);
+            LightMask = new RenderTarget2D(GraphicsDevice, SCREEN_WIDTH, SCREEN_HEIGHT);
+            WhiteTexture = new Texture2D(GraphicsDevice, 1, 1);
+            WhiteTexture.SetData(new[] { Color.White });
             MessageBG.SetData([new Color(0, 0, 0)]);
             Darkness.SetData([new Color(0, 0, 0, 150)]);
 
@@ -156,11 +159,18 @@ namespace Liferoad
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.Stencil, Color.CornflowerBlue, 0, 0);
+            GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.Stencil, Color.Black, 0, 0);
 
             _spriteBatch.Begin();
 
             MainGameScenarioManager.Draw(Content, _spriteBatch);
+
+            if (IsLightingSystemEnabled)
+            {
+                _spriteBatch.End();
+                _spriteBatch.Begin();
+                _spriteBatch.Draw(LightMask, Vector2.Zero, Color.White);
+            }
 
             _spriteBatch.End();
 

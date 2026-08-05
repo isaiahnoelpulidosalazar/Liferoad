@@ -14,11 +14,15 @@ namespace Liferoad
     public class GlobalComponents
     {
         public static int SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE = 48, VERY_SHORT = 5, SHORT = 15, MEDIUM = 30, LONG = 75;
+        public static bool IsLightingSystemEnabled = false;
         static int ShakeCounter = 0;
         public static List<TimedShake> TimedShakes = new List<TimedShake>();
         public static GraphicsDevice MainGraphicsDevice;
         public static Texture2D MessageBG;
         public static Texture2D Darkness;
+        public static Texture2D WhiteTexture;
+        public static RenderTarget2D LightMask;
+        public static Vector2 ShakeOffset = Vector2.Zero;
         public static DepthStencilState DepthStencilStateForRead;
         public static DepthStencilState DepthStencilStateForWrite;
         public static BlendState DepthStencilBlendState;
@@ -26,6 +30,14 @@ namespace Liferoad
         public static GameMapManager MainGameMapManager;
         public static GameMap CurrentMap = null;
         public static Vector3 CameraPosition = new Vector3(0, 0, 0);
+        public static Matrix CameraMatrix => Matrix.CreateTranslation(CameraPosition + new Vector3(ShakeOffset, 0));
+        public static BlendState LightCutoutBlend = new BlendState
+        {
+            ColorSourceBlend = Blend.Zero,
+            ColorDestinationBlend = Blend.InverseSourceAlpha,
+            AlphaSourceBlend = Blend.Zero,
+            AlphaDestinationBlend = Blend.InverseSourceAlpha
+        };
 
         public class TimedShake
         {
@@ -73,90 +85,91 @@ namespace Liferoad
             TimedShakes.Add(TimedShake);
         }
 
-        public static void EnableLightSystem(ContentManager Content, SpriteBatch _spriteBatch)
+        public static void EnableLightingSystem(ContentManager Content, SpriteBatch _spriteBatch)
         {
-            foreach (GameObject GameObject in CurrentMap.GetObjects())
-            {
-                if (GameObject.IsPlayerNear)
-                {
-                    _spriteBatch.End();
-                    _spriteBatch.Begin(blendState: DepthStencilBlendState, depthStencilState: DepthStencilStateForWrite);
-                    _spriteBatch.Draw(Darkness, new Rectangle((int)Math.Round(GameObject.SolidBody.X + (TILE_SIZE / 2) - (Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact").X / 2)) + (int)Math.Round(CameraPosition.X), GameObject.SolidBody.Y - (TILE_SIZE / 2) + (int)Math.Round(CameraPosition.Y), (int)Math.Round(Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact").X) + 3, (int)Math.Round(Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact").Y)), Color.White);
-                }
-            }
-            foreach (GameObject GameObject in CurrentMap.GetObjects())
-            {
-                if (GameObject.GetLightLevel() > 0)
-                {
-                    _spriteBatch.End();
-                    _spriteBatch.Begin(blendState: DepthStencilBlendState, depthStencilState: DepthStencilStateForWrite);
-                    _spriteBatch.Draw(Darkness, new Rectangle((int)Math.Round(GameObject.PositionX) + (int)Math.Round(CameraPosition.X) - (TILE_SIZE * (GameObject.GetLightLevel() - 1)) - (TILE_SIZE / 4), (int)Math.Round(GameObject.PositionY) + (int)Math.Round(CameraPosition.Y) - (TILE_SIZE * (GameObject.GetLightLevel() - 1)) - (TILE_SIZE / 4), TILE_SIZE + ((TILE_SIZE / 4) * 2) + (TILE_SIZE * (GameObject.GetLightLevel() - 1) * 2), TILE_SIZE + ((TILE_SIZE / 4) * 2) + (TILE_SIZE * (GameObject.GetLightLevel() - 1) * 2)), Color.White);
-                }
-            }
+            IsLightingSystemEnabled = true;
             _spriteBatch.End();
-            _spriteBatch.Begin(depthStencilState: DepthStencilStateForRead);
-            _spriteBatch.Draw(Darkness, new Rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), Color.White);
-            foreach (GameObject GameObject in CurrentMap.GetObjects())
+
+            MainGraphicsDevice.SetRenderTarget(LightMask);
+            MainGraphicsDevice.Clear(new Color(0, 0, 0, 200));
+
+            _spriteBatch.Begin(transformMatrix: CameraMatrix, blendState: LightCutoutBlend);
+
+            foreach (GameObject Object in CurrentMap.GetObjects())
             {
-                if (GameObject.GetLightLevel() > 0)
+                if (Object.IsPlayerNear)
                 {
-                    _spriteBatch.End();
-                    _spriteBatch.Begin(blendState: DepthStencilBlendState, depthStencilState: DepthStencilStateForWrite);
-                    _spriteBatch.Draw(Darkness, new Rectangle((int)Math.Round(GameObject.PositionX) + (int)Math.Round(CameraPosition.X) - (TILE_SIZE * GameObject.GetLightLevel()) - (TILE_SIZE / 4), (int)Math.Round(GameObject.PositionY) + (int)Math.Round(CameraPosition.Y) - (TILE_SIZE * GameObject.GetLightLevel()) - (TILE_SIZE / 4), TILE_SIZE + ((TILE_SIZE / 4) * 2) + (TILE_SIZE * GameObject.GetLightLevel() * 2), TILE_SIZE + ((TILE_SIZE / 4) * 2) + (TILE_SIZE * GameObject.GetLightLevel() * 2)), Color.White);
+                    Vector2 FontRectangle = Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact");
+                    Rectangle Bounds = new Rectangle(
+                        (int)(Object.SolidBody.X + (TILE_SIZE / 2) - (FontRectangle.X / 2)),
+                        Object.SolidBody.Y - (TILE_SIZE / 2),
+                        (int)FontRectangle.X + 3,
+                        (int)FontRectangle.Y
+                    );
+                    _spriteBatch.Draw(WhiteTexture, Bounds, Color.White);
+                }
+
+                if (Object.GetLightLevel() > 0)
+                {
+                    int LightRadius = Object.GetLightLevel() * TILE_SIZE * 2;
+                    Rectangle LightRect = new Rectangle(
+                        (int)Object.PositionX - (LightRadius / 2) + (TILE_SIZE / 2),
+                        (int)Object.PositionY - (LightRadius / 2) + (TILE_SIZE / 2),
+                        LightRadius,
+                        LightRadius
+                    );
+                    _spriteBatch.Draw(WhiteTexture, LightRect, Color.White);
                 }
             }
+
             _spriteBatch.End();
-            _spriteBatch.Begin(depthStencilState: DepthStencilStateForRead);
-            _spriteBatch.Draw(Darkness, new Rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), Color.White);
+            MainGraphicsDevice.SetRenderTarget(null);
+        }
+
+        public static void DisableLightingSystem()
+        {
+            IsLightingSystemEnabled = false;
         }
 
         public static void Shake(SpriteBatch _spriteBatch)
         {
-            switch (ShakeCounter)
+            ShakeOffset = ShakeCounter switch
             {
-                case 0:
-                    _spriteBatch.End();
-                    _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation(new Vector3(CameraPosition.X + 2, CameraPosition.Y - 2, 0)));
-                    break;
-                case 1:
-                    _spriteBatch.End();
-                    _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation(new Vector3(CameraPosition.X + 2, CameraPosition.Y + 2, 0)));
-                    break;
-                case 2:
-                    _spriteBatch.End();
-                    _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation(new Vector3(CameraPosition.X - 2, CameraPosition.Y + 2, 0)));
-                    break;
-                case 3:
-                    _spriteBatch.End();
-                    _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation(new Vector3(CameraPosition.X + 2, CameraPosition.Y - 2, 0)));
-                    break;
-                default:
-                    _spriteBatch.End();
-                    _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation(new Vector3(CameraPosition.X - 2, CameraPosition.Y - 2, 0)));
-                    ShakeCounter = 0;
-                    break;
-            }
-            ShakeCounter++;
+                0 => new Vector2(2, -2),
+                1 => new Vector2(2, 2),
+                2 => new Vector2(-2, 2),
+                3 => new Vector2(2, -2),
+                _ => new Vector2(-2, -2)
+            };
+            ShakeCounter = (ShakeCounter + 1) % 5;
         }
 
         public static void FocusToEntity(SpriteBatch _spriteBatch, Entity Entity)
         {
             CameraPosition = new Vector3((SCREEN_WIDTH / 2) - (TILE_SIZE / 2) - Entity.PositionX, (SCREEN_HEIGHT / 2) - (TILE_SIZE / 2) - Entity.PositionY, 0);
-
-            _spriteBatch.End();
-            _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation(CameraPosition));
+            ShakeOffset = Vector2.Zero;
 
             RenderTimedShakes(_spriteBatch);
+
+            if (!IsLightingSystemEnabled)
+            {
+                _spriteBatch.End();
+            }
+            _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, CameraMatrix);
         }
 
         public static void FocusToCenter(SpriteBatch _spriteBatch)
         {
             CameraPosition = new Vector3((SCREEN_WIDTH / 2) - (TILE_SIZE / 2), (SCREEN_HEIGHT / 2) - (TILE_SIZE / 2), 0);
-
-            _spriteBatch.End();
-            _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation(CameraPosition));
+            ShakeOffset = Vector2.Zero;
 
             RenderTimedShakes(_spriteBatch);
+
+            if (!IsLightingSystemEnabled)
+            {
+                _spriteBatch.End();
+            }
+            _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, CameraMatrix);
         }
 
         public class Inputs
