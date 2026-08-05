@@ -72,12 +72,12 @@ namespace Liferoad
                 ColorWriteChannels = ColorWriteChannels.None
             };
 
-            DirectoryInfo DirectoryInfo = new DirectoryInfo("Content\\Maps");
+            string[] ScenarioList = File.ReadAllLines("Content\\Maps\\_.lrsl");
 
-            foreach (FileInfo File in DirectoryInfo.GetFiles("*.cs"))
+            foreach (string Scenario in ScenarioList)
             {
-                Debug.WriteLine(File.Name);
-                MainGameScenarioManager.AddScenario((GameScenario)Activator.CreateInstance(Compiler.Run("Content\\Maps\\" + File.Name).GetType("Liferoad." + File.Name.Split('.')[0])));
+                Debug.WriteLine(Scenario);
+                MainGameScenarioManager.AddScenario((GameScenario)Activator.CreateInstance(Compiler.Run("Content\\Maps\\" + Scenario + ".cs").GetType("Liferoad." + Scenario)));
             }
         }
 
