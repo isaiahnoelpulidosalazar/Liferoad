@@ -81,7 +81,7 @@ namespace Liferoad
                 {
                     _spriteBatch.End();
                     _spriteBatch.Begin(blendState: DepthStencilBlendState, depthStencilState: DepthStencilStateForWrite);
-                    //_spriteBatch.Draw(Darkness, new Rectangle((int)Math.Round(GameObject.SolidBody.X + (TILE_SIZE / 2) - (Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact").X / 2)) + (int)Math.Round(CameraPosition.X), GameObject.SolidBody.Y - (TILE_SIZE / 2) + (int)Math.Round(CameraPosition.Y), (int)Math.Round(Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact").X) + 3, (int)Math.Round(Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact").Y)), Color.White);
+                    _spriteBatch.Draw(Darkness, new Rectangle((int)Math.Round(GameObject.SolidBody.X + (TILE_SIZE / 2) - (Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact").X / 2)) + (int)Math.Round(CameraPosition.X), GameObject.SolidBody.Y - (TILE_SIZE / 2) + (int)Math.Round(CameraPosition.Y), (int)Math.Round(Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact").X) + 3, (int)Math.Round(Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact").Y)), Color.White);
                 }
             }
             foreach (GameObject GameObject in CurrentMap.GetObjects())

@@ -99,6 +99,13 @@ namespace Liferoad
         public void Draw(ContentManager Content, SpriteBatch _spriteBatch)
         {
             _spriteBatch.Draw(Content.Load<Texture2D>("player_down"), new Vector2(PositionX, PositionY), Color.White);
+
+            if (NearestGameObject(this, CurrentMap.GetObjects()) != null)
+            {
+                GameObject NearestObject = NearestGameObject(this, CurrentMap.GetObjects());
+                _spriteBatch.Draw(MessageBG, new Rectangle((int)Math.Round(NearestObject.SolidBody.X + (TILE_SIZE / 2) - (Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact").X / 2)), NearestObject.SolidBody.Y - (TILE_SIZE / 2), (int)Math.Round(Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact").X) + 3, (int)Math.Round(Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact").Y)), Color.White);
+                _spriteBatch.DrawString(Content.Load<SpriteFont>("DefaultFont"), "[E] to interact", new Vector2(NearestObject.SolidBody.X + (TILE_SIZE / 2) + 3 - (Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact").X / 2), NearestObject.SolidBody.Y - (TILE_SIZE / 2)), Color.White, 0, new Vector2(0, 0), 1f, SpriteEffects.None, 0f);
+            }
         }
     }
 }
