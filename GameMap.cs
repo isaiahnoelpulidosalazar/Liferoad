@@ -52,6 +52,11 @@ namespace Liferoad
             }
         }
 
+        public string GetName()
+        {
+            return Name;
+        }
+
         public List<GameTile> GetTiles()
         {
             return Tiles;

@@ -79,6 +79,16 @@ namespace Liferoad
             }
         }
 
+        public static void ChangeMap(string Name)
+        {
+            MainGameMapManager.ChangeMap(Name);
+        }
+
+        public static void ChangeScenario(int Index)
+        {
+            MainGameScenarioManager.ChangeScenario(Index);
+        }
+
         public static void AddTimedShake(int Duration)
         {
             TimedShake TimedShake = new TimedShake(Duration);

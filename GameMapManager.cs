@@ -11,7 +11,6 @@ namespace Liferoad
     public class GameMapManager
     {
         List<GameMap> Maps = new List<GameMap>();
-        int Index = -1;
 
         public GameMapManager()
         {
@@ -24,23 +23,22 @@ namespace Liferoad
             }
         }
 
-        public void SelectMap(int Index)
+        public void ChangeMap(string Name)
         {
-            this.Index = Index;
-            CurrentMap = Maps[Index];
+            CurrentMap = Maps.Find(Map => Map.GetName() == Name);
         }
 
         public void Draw(ContentManager Content, SpriteBatch _spriteBatch)
         {
-            for (int a = 0; a < Maps[Index].GetTiles().Count; a++)
+            for (int a = 0; a < CurrentMap.GetTiles().Count; a++)
             {
-                GameTile temp = Maps[Index].GetTiles()[a];
+                GameTile temp = CurrentMap.GetTiles()[a];
                 _spriteBatch.Draw(temp.GetImage(), new Vector2(temp.PositionX, temp.PositionY), Color.White);
             }
 
-            for (int a = 0; a < Maps[Index].GetObjects().Count; a++)
+            for (int a = 0; a < CurrentMap.GetObjects().Count; a++)
             {
-                GameObject temp = Maps[Index].GetObjects()[a];
+                GameObject temp = CurrentMap.GetObjects()[a];
                 _spriteBatch.Draw(temp.GetImage(), new Vector2(temp.PositionX, temp.PositionY), Color.White);
             }
         }
