@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Diagnostics;
 using System.IO;
-using static Liferoad.GlobalComponents;
 
 namespace Liferoad
 {
@@ -16,7 +15,6 @@ namespace Liferoad
         public MainCode()
         {
             _graphics = new GraphicsDeviceManager(this);
-            _graphics.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
             _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
             _graphics.IsFullScreen = true;
@@ -28,14 +26,7 @@ namespace Liferoad
 
         protected override void Initialize()
         {
-            SCREEN_WIDTH = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-            SCREEN_HEIGHT = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
-            MainGraphicsDevice = GraphicsDevice;
-            MainGameScenarioManager = new GameScenarioManager();
-            MainGameMapManager = new GameMapManager();
-
-            Debug.WriteLine(SCREEN_WIDTH);
-            Debug.WriteLine(SCREEN_HEIGHT);
+            GlobalComponents.Initialize(GraphicsDevice);
 
             base.Initialize();
         }
@@ -44,43 +35,15 @@ namespace Liferoad
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            MessageBG = new Texture2D(GraphicsDevice, 1, 1);
-            Darkness = new Texture2D(GraphicsDevice, 1, 1);
-            LightMask = new RenderTarget2D(GraphicsDevice, SCREEN_WIDTH, SCREEN_HEIGHT);
-            WhiteTexture = new Texture2D(GraphicsDevice, 1, 1);
-            WhiteTexture.SetData(new[] { Color.White });
-            MessageBG.SetData([new Color(0, 0, 0)]);
-            Darkness.SetData([new Color(0, 0, 0, 150)]);
-
-            DepthStencilStateForRead = new DepthStencilState
-            {
-                StencilEnable = true,
-                StencilFunction = CompareFunction.Equal,
-                ReferenceStencil = 0,
-                DepthBufferEnable = false
-            };
-            DepthStencilStateForWrite = new DepthStencilState
-            {
-                StencilEnable = true,
-                StencilFunction = CompareFunction.Always,
-                StencilPass = StencilOperation.Replace,
-                ReferenceStencil = 1,
-                DepthBufferEnable = false
-            };
-            DepthStencilBlendState = new BlendState
-            {
-                ColorWriteChannels = ColorWriteChannels.None
-            };
-
             DirectoryInfo DirectoryInfo = new DirectoryInfo("Content\\Scenarios");
 
             foreach (FileInfo File in DirectoryInfo.GetFiles("*.cs"))
             {
                 Debug.WriteLine(File.Name);
-                MainGameScenarioManager.AddScenario((GameScenario)Activator.CreateInstance(Compiler.Run("Content\\Scenarios\\" + File.Name).GetType("Liferoad." + File.Name.Split('.')[0])));
+                GlobalComponents.GetGameScenarioManager().AddScenario((GameScenario)Activator.CreateInstance(Compiler.Run("Content\\Scenarios\\" + File.Name).GetType("Liferoad." + File.Name.Split('.')[0])));
             }
 
-            MainGameScenarioManager.ChangeScenario("MainMenu");
+            GlobalComponents.GetGameScenarioManager().ChangeScenario("Test");
         }
 
         protected override void Update(GameTime gameTime)
@@ -90,71 +53,9 @@ namespace Liferoad
                 Exit();
             }
 
-            if (Mouse.GetState().LeftButton == ButtonState.Pressed)
-            {
-                Inputs.MouseDown = true;
-                Inputs.MousePress = true;
-            }
-            else
-            {
-                Inputs.MouseDown = false;
-            }
-            if (Inputs.MousePress && !Inputs.MouseDown)
-            {
-                Inputs.MouseUp = true;
-                Inputs.MousePress = false;
-            }
-            else
-            {
-                Inputs.MouseUp = false;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
-            {
-                Inputs.Up = true;
-            }
-            else
-            {
-                Inputs.Up = false;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.S))
-            {
-                Inputs.Down = true;
-            }
-            else
-            {
-                Inputs.Down = false;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.A))
-            {
-                Inputs.Left = true;
-            }
-            else
-            {
-                Inputs.Left = false;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.D))
-            {
-                Inputs.Right = true;
-            }
-            else
-            {
-                Inputs.Right = false;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.E))
-            {
-                Inputs.InteractReset = true;
-            }
-            if (Inputs.InteractReset && !Keyboard.GetState().IsKeyDown(Keys.E))
-            {
-                Inputs.Interact = true;
-                Inputs.InteractReset = false;
-            }
-            else
-            {
-                Inputs.Interact = false;
-            }
+            Inputs.Update();
 
-            MainGameScenarioManager.Update();
+            GlobalComponents.GetGameScenarioManager().Update();
 
             base.Update(gameTime);
         }
@@ -165,13 +66,13 @@ namespace Liferoad
 
             _spriteBatch.Begin();
 
-            MainGameScenarioManager.Draw(Content, _spriteBatch);
+            GlobalComponents.GetGameScenarioManager().Draw(Content, _spriteBatch);
 
-            if (IsLightingSystemEnabled)
+            if (LightingSystem.IsLightingSystemEnabled())
             {
                 _spriteBatch.End();
                 _spriteBatch.Begin();
-                _spriteBatch.Draw(LightMask, Vector2.Zero, Color.White);
+                _spriteBatch.Draw(GlobalComponents.GetLightMask(), Vector2.Zero, Color.White);
             }
 
             _spriteBatch.End();

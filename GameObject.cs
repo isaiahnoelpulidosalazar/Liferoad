@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using static Liferoad.GlobalComponents;
 
 namespace Liferoad
 {
@@ -19,7 +18,7 @@ namespace Liferoad
         {
             this.PositionX = PositionX;
             this.PositionY = PositionY;
-            SolidBody = new Rectangle((int)Math.Round(PositionX), (int)Math.Round(PositionY), TILE_SIZE, TILE_SIZE);
+            SolidBody = new Rectangle((int)Math.Round(PositionX), (int)Math.Round(PositionY), GlobalComponents.TILE_SIZE, GlobalComponents.TILE_SIZE);
             this.Image = Image;
             this.IsSolid = IsSolid;
         }

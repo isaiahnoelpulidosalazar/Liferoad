@@ -1,38 +1,26 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 
 namespace Liferoad
 {
     public class GlobalComponents
     {
-        public static int SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE = 48, VERY_SHORT = 5, SHORT = 15, MEDIUM = 30, LONG = 75;
-        public static bool IsLightingSystemEnabled = false;
-        static int ShakeCounter = 0;
-        public static List<TimedShake> TimedShakes = new List<TimedShake>();
-        public static GraphicsDevice MainGraphicsDevice;
-        public static Texture2D MessageBG;
-        public static Texture2D Darkness;
-        public static Texture2D WhiteTexture;
-        public static RenderTarget2D LightMask;
-        public static Vector2 ShakeOffset = Vector2.Zero;
-        public static DepthStencilState DepthStencilStateForRead;
-        public static DepthStencilState DepthStencilStateForWrite;
-        public static BlendState DepthStencilBlendState;
-        public static GameScenarioManager MainGameScenarioManager;
-        public static GameMapManager MainGameMapManager;
-        public static GameScenario CurrentScenario = null;
-        public static GameMap CurrentMap = null;
-        public static Vector3 CameraPosition = new Vector3(0, 0, 0);
-        public static Matrix CameraMatrix => Matrix.CreateTranslation(CameraPosition + new Vector3(ShakeOffset, 0));
-        public static BlendState LightCutoutBlend = new BlendState
+        static int SCREEN_WIDTH, SCREEN_HEIGHT;
+        public const int TILE_SIZE = 48, VERY_SHORT = 5, SHORT = 15, MEDIUM = 30, LONG = 75;
+        
+        static GraphicsDevice GraphicsDevice;
+        static GameScenarioManager GameScenarioManager;
+        static GameMapManager GameMapManager;
+
+        static Texture2D MessageBackground;
+        static Texture2D Darkness;
+        static Texture2D WhiteTexture;
+        static RenderTarget2D LightMask;
+
+        static BlendState LightCutoutBlend = new BlendState
         {
             ColorSourceBlend = Blend.Zero,
             ColorDestinationBlend = Blend.InverseSourceAlpha,
@@ -40,197 +28,114 @@ namespace Liferoad
             AlphaDestinationBlend = Blend.InverseSourceAlpha
         };
 
-        public class TimedShake
+        public static void Initialize(GraphicsDevice _graphicsDevice)
         {
-            public bool IsActive { get; set; }
-            int TimedShakeCounter = 0, Duration;
+            SCREEN_WIDTH = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            SCREEN_HEIGHT = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
 
-            public TimedShake(int Duration)
-            {
-                this.Duration = Duration;
-                IsActive = true;
-            }
+            GraphicsDevice = _graphicsDevice;
+            GameScenarioManager = new GameScenarioManager();
+            GameMapManager = new GameMapManager();
 
-            public void Run(SpriteBatch _spriteBatch)
-            {
-                if (TimedShakeCounter < Duration)
-                {
-                    Shake(_spriteBatch);
-                    TimedShakeCounter++;
-                }
-                else
-                {
-                    IsActive = false;
-                }
-            }
+            MessageBackground = new Texture2D(GraphicsDevice, 1, 1);
+            Darkness = new Texture2D(GraphicsDevice, 1, 1);
+            WhiteTexture = new Texture2D(GraphicsDevice, 1, 1);
+            MessageBackground.SetData(new[] { Color.Black });
+            Darkness.SetData([new Color(0, 0, 0, 150)]);
+            WhiteTexture.SetData(new[] { Color.White });
+
+            LightMask = new RenderTarget2D(GraphicsDevice, SCREEN_WIDTH, SCREEN_HEIGHT);
         }
 
-        public static void RenderTimedShakes(SpriteBatch _spriteBatch)
+        public static int GetScreenWidth()
         {
-            if (TimedShakes.Count > 0)
-            {
-                if (TimedShakes[0].IsActive)
-                {
-                    TimedShakes[0].Run(_spriteBatch);
-                }
-                else
-                {
-                    TimedShakes.Remove(TimedShakes[0]);
-                }
-            }
+            return SCREEN_WIDTH;
         }
 
-        public static void ChangeMap(string Name)
+        public static int GetScreenHeight()
         {
-            MainGameMapManager.ChangeMap(Name);
+            return SCREEN_HEIGHT;
+        }
+
+        public static GraphicsDevice GetGraphicsDevice()
+        {
+            return GraphicsDevice;
+        }
+
+        public static GameScenarioManager GetGameScenarioManager()
+        {
+            return GameScenarioManager;
+        }
+
+        public static GameMapManager GetGameMapManager()
+        {
+            return GameMapManager;
+        }
+
+        public static Texture2D GetMessageBackground()
+        {
+            return MessageBackground;
+        }
+
+        public static Texture2D GetWhiteTexture()
+        {
+            return WhiteTexture;
+        }
+
+        public static RenderTarget2D GetLightMask()
+        {
+            return LightMask;
+        }
+
+        public static BlendState GetLightCutoutBlend()
+        {
+            return LightCutoutBlend;
         }
 
         public static void ChangeScenario(string Name)
         {
-            MainGameScenarioManager.ChangeScenario(Name);
+            GameScenarioManager.ChangeScenario(Name);
         }
 
-        public static void AddTimedShake(int Duration)
+        public static void ChangeMap(string Name)
         {
-            TimedShake TimedShake = new TimedShake(Duration);
-            TimedShakes.Add(TimedShake);
+            GameMapManager.ChangeMap(Name);
         }
 
-        public static void EnableLightingSystem(ContentManager Content, SpriteBatch _spriteBatch)
+        public static void DrawMap(ContentManager Content, SpriteBatch _spriteBatch)
         {
-            IsLightingSystemEnabled = true;
-            _spriteBatch.End();
+            GameMapManager.Draw(Content, _spriteBatch);
+        }
 
-            MainGraphicsDevice.SetRenderTarget(LightMask);
-            MainGraphicsDevice.Clear(new Color(0, 0, 0, 200));
+        public static GameObject GetGameObject(int Index)
+        {
+            return GameMapManager.GetCurrentGameMap().GetObjects()[Index];
+        }
 
-            _spriteBatch.Begin(transformMatrix: CameraMatrix, blendState: LightCutoutBlend);
-
-            foreach (GameObject Object in CurrentMap.GetObjects())
+        public static void SetAllGameObjectsLightLevel(int LightLevel)
+        {
+            foreach (GameObject Object in GameMapManager.GetCurrentGameMap().GetObjects())
             {
-                if (Object.IsPlayerNear)
-                {
-                    Vector2 FontRectangle = Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact");
-                    Rectangle Bounds = new Rectangle(
-                        (int)(Object.SolidBody.X + (TILE_SIZE / 2) - (FontRectangle.X / 2)),
-                        Object.SolidBody.Y - (TILE_SIZE / 2),
-                        (int)FontRectangle.X + 3,
-                        (int)FontRectangle.Y
-                    );
-                    _spriteBatch.Draw(WhiteTexture, Bounds, Color.White);
-                }
-
-                if (Object.GetLightLevel() > 0)
-                {
-                    int LightRadius = Object.GetLightLevel() * TILE_SIZE * 2;
-                    Rectangle LightRect = new Rectangle(
-                        (int)Object.PositionX - (LightRadius / 2) + (TILE_SIZE / 2),
-                        (int)Object.PositionY - (LightRadius / 2) + (TILE_SIZE / 2),
-                        LightRadius,
-                        LightRadius
-                    );
-                    _spriteBatch.Draw(WhiteTexture, LightRect, Color.White);
-                }
+                Object.SetLightLevel(LightLevel);
             }
-
-            _spriteBatch.End();
-            MainGraphicsDevice.SetRenderTarget(null);
         }
 
-        public static void DisableLightingSystem()
+        public static void SetAllGameObjectsEvent(Action Event)
         {
-            IsLightingSystemEnabled = false;
-        }
-
-        public static void Shake(SpriteBatch _spriteBatch)
-        {
-            ShakeOffset = ShakeCounter switch
+            foreach (GameObject Object in GameMapManager.GetCurrentGameMap().GetObjects())
             {
-                0 => new Vector2(2, -2),
-                1 => new Vector2(2, 2),
-                2 => new Vector2(-2, 2),
-                3 => new Vector2(2, -2),
-                _ => new Vector2(-2, -2)
-            };
-            ShakeCounter = (ShakeCounter + 1) % 5;
-        }
-
-        public static void FocusToEntity(SpriteBatch _spriteBatch, Entity Entity)
-        {
-            CameraPosition = new Vector3((SCREEN_WIDTH / 2) - (TILE_SIZE / 2) - Entity.PositionX, (SCREEN_HEIGHT / 2) - (TILE_SIZE / 2) - Entity.PositionY, 0);
-            ShakeOffset = Vector2.Zero;
-
-            RenderTimedShakes(_spriteBatch);
-
-            if (!IsLightingSystemEnabled)
-            {
-                _spriteBatch.End();
+                Object.SetEvent(Event);
             }
-            _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, CameraMatrix);
         }
 
-        public static void FocusToCenter(SpriteBatch _spriteBatch)
+        public static void SetGameObjectLightLevel(int Index, int LightLevel)
         {
-            CameraPosition = new Vector3((SCREEN_WIDTH / 2) - (TILE_SIZE / 2), (SCREEN_HEIGHT / 2) - (TILE_SIZE / 2), 0);
-            ShakeOffset = Vector2.Zero;
-
-            RenderTimedShakes(_spriteBatch);
-
-            if (!IsLightingSystemEnabled)
-            {
-                _spriteBatch.End();
-            }
-            _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, CameraMatrix);
+            GameMapManager.GetCurrentGameMap().GetObjects()[Index].SetLightLevel(LightLevel);
         }
 
-        public class Inputs
+        public static void SetGameObjectEvent(int Index, Action Event)
         {
-            public static bool Up, Down, Left, Right, MouseDown, MousePress, MouseUp, Interact, InteractReset;
-            public static int MouseX, MouseY;
-            public static float Theta, AngleInDegrees;
-        }
-
-        public class Compiler
-        {
-            public static Assembly Run(string FilePath)
-            {
-                string Code = File.ReadAllText(FilePath);
-                string[] Split = FilePath.Split("\\");
-
-                var CompilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
-
-                var References = AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(Assembly => !Assembly.IsDynamic && !string.IsNullOrEmpty(Assembly.Location))
-                    .Select(Assembly => MetadataReference.CreateFromFile(Assembly.Location))
-                    .ToList();
-
-                var SyntaxTree = SyntaxFactory.ParseSyntaxTree(Code);
-                var Compilation = CSharpCompilation.Create(Split[Split.Length - 1])
-                    .WithOptions(CompilationOptions)
-                    .AddReferences(References)
-                    .AddSyntaxTrees(SyntaxTree);
-
-                using (MemoryStream MemoryStream = new MemoryStream())
-                {
-                    var EmitResult = Compilation.Emit(MemoryStream);
-
-                    if (!EmitResult.Success)
-                    {
-                        foreach (var Diagnostic in EmitResult.Diagnostics)
-                        {
-                            Console.WriteLine(Diagnostic.GetMessage());
-                        }
-                    }
-                    else
-                    {
-                        MemoryStream.Seek(0, SeekOrigin.Begin);
-
-                        return Assembly.Load(MemoryStream.ToArray());
-                    }
-                }
-
-                return null;
-            }
+            GameMapManager.GetCurrentGameMap().GetObjects()[Index].SetEvent(Event);
         }
     }
 }

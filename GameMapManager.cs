@@ -4,13 +4,13 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using static Liferoad.GlobalComponents;
 
 namespace Liferoad
 {
     public class GameMapManager
     {
         List<GameMap> Maps = new List<GameMap>();
+        static GameMap CurrentGameMap;
 
         public GameMapManager()
         {
@@ -25,22 +25,27 @@ namespace Liferoad
 
         public void ChangeMap(string Name)
         {
-            CurrentMap = Maps.Find(Map => Map.GetName() == Name);
+            CurrentGameMap = Maps.Find(Map => Map.GetName() == Name);
         }
 
         public void Draw(ContentManager Content, SpriteBatch _spriteBatch)
         {
-            for (int a = 0; a < CurrentMap.GetTiles().Count; a++)
+            for (int a = 0; a < CurrentGameMap.GetTiles().Count; a++)
             {
-                GameTile temp = CurrentMap.GetTiles()[a];
+                GameTile temp = CurrentGameMap.GetTiles()[a];
                 _spriteBatch.Draw(temp.GetImage(), new Vector2(temp.PositionX, temp.PositionY), Color.White);
             }
 
-            for (int a = 0; a < CurrentMap.GetObjects().Count; a++)
+            for (int a = 0; a < CurrentGameMap.GetObjects().Count; a++)
             {
-                GameObject temp = CurrentMap.GetObjects()[a];
+                GameObject temp = CurrentGameMap.GetObjects()[a];
                 _spriteBatch.Draw(temp.GetImage(), new Vector2(temp.PositionX, temp.PositionY), Color.White);
             }
+        }
+
+        public GameMap GetCurrentGameMap()
+        {
+            return CurrentGameMap;
         }
     }
 }

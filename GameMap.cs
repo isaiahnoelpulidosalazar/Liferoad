@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using static Liferoad.GlobalComponents;
 
 namespace Liferoad
 {
@@ -34,7 +33,7 @@ namespace Liferoad
                     int Index = Convert.ToInt32(temp[b]) - 1;
                     if (Index >= 0)
                     {
-                        Tiles.Add(new GameTile(TILE_SIZE * b, TILE_SIZE * a, Texture2D.FromFile(MainGraphicsDevice, "Content\\Tiles\\" + (TileImages[Index].Contains("!") ? TileImages[Index].Substring(0, TileImages[Index].Length - 1) : TileImages[Index]) + ".png"), TileImages[Index].Contains("!")));
+                        Tiles.Add(new GameTile(GlobalComponents.TILE_SIZE * b, GlobalComponents.TILE_SIZE * a, Texture2D.FromFile(GlobalComponents.GetGraphicsDevice(), "Content\\Tiles\\" + (TileImages[Index].Contains("!") ? TileImages[Index].Substring(0, TileImages[Index].Length - 1) : TileImages[Index]) + ".png"), TileImages[Index].Contains("!")));
                     }
                 }
             }
@@ -46,7 +45,7 @@ namespace Liferoad
                     int Index = Convert.ToInt32(temp[b]) - 1;
                     if (Index >= 0)
                     {
-                        Objects.Add(new GameObject(TILE_SIZE * b, TILE_SIZE * a, Texture2D.FromFile(MainGraphicsDevice, "Content\\Objects\\" + (ObjectImages[Index].Contains("!") ? ObjectImages[Index].Substring(0, ObjectImages[Index].Length - 1) : ObjectImages[Index]) + ".png"), ObjectImages[Index].Contains("!")));
+                        Objects.Add(new GameObject(GlobalComponents.TILE_SIZE * b, GlobalComponents.TILE_SIZE * a, Texture2D.FromFile(GlobalComponents.GetGraphicsDevice(), "Content\\Objects\\" + (ObjectImages[Index].Contains("!") ? ObjectImages[Index].Substring(0, ObjectImages[Index].Length - 1) : ObjectImages[Index]) + ".png"), ObjectImages[Index].Contains("!")));
                     }
                 }
             }
