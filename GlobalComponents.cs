@@ -28,6 +28,7 @@ namespace Liferoad
         public static BlendState DepthStencilBlendState;
         public static GameScenarioManager MainGameScenarioManager;
         public static GameMapManager MainGameMapManager;
+        public static GameScenario CurrentScenario = null;
         public static GameMap CurrentMap = null;
         public static Vector3 CameraPosition = new Vector3(0, 0, 0);
         public static Matrix CameraMatrix => Matrix.CreateTranslation(CameraPosition + new Vector3(ShakeOffset, 0));
@@ -84,9 +85,9 @@ namespace Liferoad
             MainGameMapManager.ChangeMap(Name);
         }
 
-        public static void ChangeScenario(int Index)
+        public static void ChangeScenario(string Name)
         {
-            MainGameScenarioManager.ChangeScenario(Index);
+            MainGameScenarioManager.ChangeScenario(Name);
         }
 
         public static void AddTimedShake(int Duration)

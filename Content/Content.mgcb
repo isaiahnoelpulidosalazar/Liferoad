@@ -21,6 +21,14 @@
 /processorParam:Version=3.8.5.0
 /build:DefaultFont.spritefont
 
+#begin DefaultFontTitle.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/processorParam:Version=3.8.5.0
+/build:DefaultFontTitle.spritefont
+
 #begin Micro5-Regular.ttf
 /importer:FontImporter
 /processor:FontDescriptionProcessor

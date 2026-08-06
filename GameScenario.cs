@@ -5,7 +5,12 @@ namespace Liferoad
 {
     public abstract class GameScenario
     {
+        public string Name;
         public abstract void Update();
         public abstract void Draw(ContentManager Content, SpriteBatch _spriteBatch);
+        public string GetName()
+        {
+            return Name;
+        }
     }
 }
