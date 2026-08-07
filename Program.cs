@@ -1,2 +1,2 @@
-﻿using var game = new Liferoad.MainCode();
+﻿using var game = new Liferoad.Engine();
 game.Run();

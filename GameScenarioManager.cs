@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Content;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
@@ -19,9 +20,9 @@ namespace Liferoad
             CurrentGameScenario = Scenarios.Find(Scenario => Scenario.GetName() == Name);
         }
 
-        public void Update()
+        public void Update(GameTime gameTime)
         {
-            CurrentGameScenario.Update();
+            CurrentGameScenario.Update(gameTime);
         }
 
         public void Draw(ContentManager Content, SpriteBatch _spriteBatch)

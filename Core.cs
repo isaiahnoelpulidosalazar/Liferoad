@@ -2,11 +2,10 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
 
 namespace Liferoad
 {
-    public class GlobalComponents
+    public class Core
     {
         static int SCREEN_WIDTH, SCREEN_HEIGHT;
         public const int TILE_SIZE = 48, VERY_SHORT = 5, SHORT = 15, MEDIUM = 30, LONG = 75;
@@ -110,6 +109,11 @@ namespace Liferoad
         public static GameObject GetGameObject(int Index)
         {
             return GameMapManager.GetCurrentGameMap().GetObjects()[Index];
+        }
+
+        public static void DestroyGameObject(int Index)
+        {
+            GameMapManager.GetCurrentGameMap().RemoveObject(Index);
         }
 
         public static void SetAllGameObjectsLightLevel(int LightLevel)

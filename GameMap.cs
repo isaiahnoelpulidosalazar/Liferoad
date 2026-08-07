@@ -33,7 +33,7 @@ namespace Liferoad
                     int Index = Convert.ToInt32(temp[b]) - 1;
                     if (Index >= 0)
                     {
-                        Tiles.Add(new GameTile(GlobalComponents.TILE_SIZE * b, GlobalComponents.TILE_SIZE * a, Texture2D.FromFile(GlobalComponents.GetGraphicsDevice(), "Content\\Tiles\\" + (TileImages[Index].Contains("!") ? TileImages[Index].Substring(0, TileImages[Index].Length - 1) : TileImages[Index]) + ".png"), TileImages[Index].Contains("!")));
+                        Tiles.Add(new GameTile(Core.TILE_SIZE * b, Core.TILE_SIZE * a, Texture2D.FromFile(Core.GetGraphicsDevice(), "Content\\Tiles\\" + (TileImages[Index].Contains("!") ? TileImages[Index].Substring(0, TileImages[Index].Length - 1) : TileImages[Index]) + ".png"), TileImages[Index].Contains("!")));
                     }
                 }
             }
@@ -45,10 +45,20 @@ namespace Liferoad
                     int Index = Convert.ToInt32(temp[b]) - 1;
                     if (Index >= 0)
                     {
-                        Objects.Add(new GameObject(GlobalComponents.TILE_SIZE * b, GlobalComponents.TILE_SIZE * a, Texture2D.FromFile(GlobalComponents.GetGraphicsDevice(), "Content\\Objects\\" + (ObjectImages[Index].Contains("!") ? ObjectImages[Index].Substring(0, ObjectImages[Index].Length - 1) : ObjectImages[Index]) + ".png"), ObjectImages[Index].Contains("!")));
+                        Objects.Add(new GameObject(Core.TILE_SIZE * b, Core.TILE_SIZE * a, Texture2D.FromFile(Core.GetGraphicsDevice(), "Content\\Objects\\" + (ObjectImages[Index].Contains("!") ? ObjectImages[Index].Substring(0, ObjectImages[Index].Length - 1) : ObjectImages[Index]) + ".png"), ObjectImages[Index].Contains("!")));
                     }
                 }
             }
+        }
+
+        public void RemoveObject(GameObject Object)
+        {
+            Objects.Remove(Object);
+        }
+
+        public void RemoveObject(int Index)
+        {
+            Objects.RemoveAt(Index);
         }
 
         public string GetName()

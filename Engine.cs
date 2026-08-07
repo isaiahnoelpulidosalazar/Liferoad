@@ -4,15 +4,17 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace Liferoad
 {
-    public class MainCode : Game
+    public class Engine : Game
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        public MainCode()
+        public Engine()
         {
             _graphics = new GraphicsDeviceManager(this);
             _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
@@ -26,7 +28,7 @@ namespace Liferoad
 
         protected override void Initialize()
         {
-            GlobalComponents.Initialize(GraphicsDevice);
+            Core.Initialize(GraphicsDevice);
 
             base.Initialize();
         }
@@ -39,11 +41,19 @@ namespace Liferoad
 
             foreach (FileInfo File in DirectoryInfo.GetFiles("*.cs"))
             {
-                Debug.WriteLine(File.Name);
-                GlobalComponents.GetGameScenarioManager().AddScenario((GameScenario)Activator.CreateInstance(Compiler.Run("Content\\Scenarios\\" + File.Name).GetType("Liferoad." + File.Name.Split('.')[0])));
+                Assembly CompiledAssembly = Compiler.Run("Content\\Scenarios\\" + File.Name);
+                Type ScenarioType = CompiledAssembly.GetTypes()
+                    .FirstOrDefault(t => typeof(GameScenario).IsAssignableFrom(t)
+                      && !t.IsAbstract
+                      && t.IsClass);
+
+                if (ScenarioType != null)
+                {
+                    Core.GetGameScenarioManager().AddScenario((GameScenario)Activator.CreateInstance(ScenarioType));
+                }
             }
 
-            GlobalComponents.GetGameScenarioManager().ChangeScenario("Test");
+            Core.GetGameScenarioManager().ChangeScenario("MainMenu");
         }
 
         protected override void Update(GameTime gameTime)
@@ -55,7 +65,7 @@ namespace Liferoad
 
             Inputs.Update();
 
-            GlobalComponents.GetGameScenarioManager().Update();
+            Core.GetGameScenarioManager().Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -66,13 +76,13 @@ namespace Liferoad
 
             _spriteBatch.Begin();
 
-            GlobalComponents.GetGameScenarioManager().Draw(Content, _spriteBatch);
+            Core.GetGameScenarioManager().Draw(Content, _spriteBatch);
 
             if (LightingSystem.IsLightingSystemEnabled())
             {
                 _spriteBatch.End();
                 _spriteBatch.Begin();
-                _spriteBatch.Draw(GlobalComponents.GetLightMask(), Vector2.Zero, Color.White);
+                _spriteBatch.Draw(Core.GetLightMask(), Vector2.Zero, Color.White);
             }
 
             _spriteBatch.End();

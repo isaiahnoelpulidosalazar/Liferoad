@@ -78,7 +78,7 @@ namespace Liferoad
 
         public static void FocusToEntity(SpriteBatch _spriteBatch, Entity Entity)
         {
-            CameraPosition = new Vector3((GlobalComponents.GetScreenWidth() / 2) - (GlobalComponents.TILE_SIZE / 2) - Entity.PositionX, (GlobalComponents.GetScreenHeight() / 2) - (GlobalComponents.TILE_SIZE / 2) - Entity.PositionY, 0);
+            CameraPosition = new Vector3((Core.GetScreenWidth() / 2) - (Core.TILE_SIZE / 2) - Entity.PositionX, (Core.GetScreenHeight() / 2) - (Core.TILE_SIZE / 2) - Entity.PositionY, 0);
             ShakeOffset = Vector2.Zero;
 
             RenderShake(_spriteBatch);
@@ -92,7 +92,7 @@ namespace Liferoad
 
         public static void FocusToCenter(SpriteBatch _spriteBatch)
         {
-            CameraPosition = new Vector3((GlobalComponents.GetScreenWidth() / 2) - (GlobalComponents.TILE_SIZE / 2), (GlobalComponents.GetScreenHeight() / 2) - (GlobalComponents.TILE_SIZE / 2), 0);
+            CameraPosition = new Vector3((Core.GetScreenWidth() / 2) - (Core.TILE_SIZE / 2), (Core.GetScreenHeight() / 2) - (Core.TILE_SIZE / 2), 0);
             ShakeOffset = Vector2.Zero;
 
             RenderShake(_spriteBatch);

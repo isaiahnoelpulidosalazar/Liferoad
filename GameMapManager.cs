@@ -18,7 +18,6 @@ namespace Liferoad
 
             foreach (FileInfo File in DirectoryInfo.GetFiles("*.lrmap"))
             {
-                Debug.WriteLine(File.Name);
                 Maps.Add(new GameMap(File.Name.Split('.')[0]));
             }
         }

@@ -18,7 +18,7 @@ namespace Liferoad
         {
             this.PositionX = PositionX;
             this.PositionY = PositionY;
-            SolidBody = new Rectangle((int)Math.Round(PositionX), (int)Math.Round(PositionY), GlobalComponents.TILE_SIZE, GlobalComponents.TILE_SIZE);
+            SolidBody = new Rectangle((int)Math.Round(PositionX), (int)Math.Round(PositionY), Core.TILE_SIZE, Core.TILE_SIZE);
             this.Image = Image;
             this.IsSolid = IsSolid;
         }

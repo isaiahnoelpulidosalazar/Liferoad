@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -21,6 +22,12 @@ namespace Liferoad
                 .Select(Assembly => MetadataReference.CreateFromFile(Assembly.Location))
                 .ToList();
 
+            var CoreAssembly = Assembly.GetExecutingAssembly().Location;
+            if (!string.IsNullOrEmpty(CoreAssembly) && !References.Any(r => r.FilePath == CoreAssembly))
+            {
+                References.Add(MetadataReference.CreateFromFile(CoreAssembly));
+            }
+
             var SyntaxTree = SyntaxFactory.ParseSyntaxTree(Code);
             var Compilation = CSharpCompilation.Create(Split[Split.Length - 1])
                 .WithOptions(CompilationOptions)
@@ -35,7 +42,7 @@ namespace Liferoad
                 {
                     foreach (var Diagnostic in EmitResult.Diagnostics)
                     {
-                        Console.WriteLine(Diagnostic.GetMessage());
+                        Debug.WriteLine(Diagnostic.GetMessage());
                     }
                 }
                 else

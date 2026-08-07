@@ -13,40 +13,40 @@ namespace Liferoad
             IsEnabled = true;
             _spriteBatch.End();
 
-            GlobalComponents.GetGraphicsDevice().SetRenderTarget(GlobalComponents.GetLightMask());
-            GlobalComponents.GetGraphicsDevice().Clear(new Color(0, 0, 0, 200));
+            Core.GetGraphicsDevice().SetRenderTarget(Core.GetLightMask());
+            Core.GetGraphicsDevice().Clear(new Color(0, 0, 0, 200));
 
-            _spriteBatch.Begin(transformMatrix: Camera.GetCameraMatrix(), blendState: GlobalComponents.GetLightCutoutBlend());
+            _spriteBatch.Begin(transformMatrix: Camera.GetCameraMatrix(), blendState: Core.GetLightCutoutBlend());
 
-            foreach (GameObject Object in GlobalComponents.GetGameMapManager().GetCurrentGameMap().GetObjects())
+            foreach (GameObject Object in Core.GetGameMapManager().GetCurrentGameMap().GetObjects())
             {
                 if (Object.IsPlayerNear)
                 {
                     Vector2 FontRectangle = Content.Load<SpriteFont>("DefaultFont").MeasureString("[E] to interact");
                     Rectangle Bounds = new Rectangle(
-                        (int)(Object.SolidBody.X + (GlobalComponents.TILE_SIZE / 2) - (FontRectangle.X / 2)),
-                        Object.SolidBody.Y - (GlobalComponents.TILE_SIZE / 2),
+                        (int)(Object.SolidBody.X + (Core.TILE_SIZE / 2) - (FontRectangle.X / 2)),
+                        Object.SolidBody.Y - (Core.TILE_SIZE / 2),
                         (int)FontRectangle.X + 3,
                         (int)FontRectangle.Y
                     );
-                    _spriteBatch.Draw(GlobalComponents.GetWhiteTexture(), Bounds, Color.White);
+                    _spriteBatch.Draw(Core.GetWhiteTexture(), Bounds, Color.White);
                 }
 
                 if (Object.GetLightLevel() > 0)
                 {
-                    int LightRadius = Object.GetLightLevel() * GlobalComponents.TILE_SIZE * 2;
+                    int LightRadius = Object.GetLightLevel() * Core.TILE_SIZE * 2;
                     Rectangle LightRect = new Rectangle(
-                        (int)Object.PositionX - (LightRadius / 2) + (GlobalComponents.TILE_SIZE / 2),
-                        (int)Object.PositionY - (LightRadius / 2) + (GlobalComponents.TILE_SIZE / 2),
+                        (int)Object.PositionX - (LightRadius / 2) + (Core.TILE_SIZE / 2),
+                        (int)Object.PositionY - (LightRadius / 2) + (Core.TILE_SIZE / 2),
                         LightRadius,
                         LightRadius
                     );
-                    _spriteBatch.Draw(GlobalComponents.GetWhiteTexture(), LightRect, Color.White);
+                    _spriteBatch.Draw(Core.GetWhiteTexture(), LightRect, Color.White);
                 }
             }
 
             _spriteBatch.End();
-            GlobalComponents.GetGraphicsDevice().SetRenderTarget(null);
+            Core.GetGraphicsDevice().SetRenderTarget(null);
         }
 
         public static void Disable()
